@@ -1,0 +1,10 @@
+Utiliza las librerias:
+vuetify.min.css
+vuetify.min.js
+https://vuetifyjs.com/en/introduction/why-vuetify/
+
+
+Para cambiar de versión se debe editar el archivo JS, colocar lenguaje en español y los colores institucionales
+Vuetify esta en constante actualiación y mejoras, revisen los cambios de versión.
+
+https://github.com/vuetifyjs/vuetify/releases/

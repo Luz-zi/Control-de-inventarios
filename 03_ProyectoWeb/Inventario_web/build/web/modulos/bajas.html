@@ -1,0 +1,255 @@
+<div id="modulo-bajas">
+  <v-app>
+    <v-container fluid>
+    
+      <!-- Card principal -->
+      <v-card>
+        <v-card-title class="white--text" style="background-color: #00b293;">
+          Bajas de equipos
+        </v-card-title>
+        <v-card-text>
+          <v-container fluid>
+            <!-- Campos del formulario -->
+            <v-row justify="center" class="py-2">
+              <v-col cols="12" md="4">
+                <v-text-field outlined v-model="nombre" label="Nombre de equipo"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-text-field outlined v-model="campus" label="Marca"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-text-field outlined v-model="departamento" label="Modelo"></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row justify="center" class="py-2">
+              <v-col cols="12" md="4">
+                <v-text-field outlined v-model="puesto" label="Último usuario"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-menu
+                  v-model="menuFecha"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="fechaBaja"
+                      label="Fecha de baja"
+                      prepend-icon="mdi-calendar"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                      outlined
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="fechaBaja"
+                    locale="es"
+                    @input="menuFecha = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-textarea outlined v-model="descripcion" label="Motivo"></v-textarea>
+              </v-col>
+            </v-row>
+
+            <!-- Botones Guardar / Editar -->
+            <v-row justify="center" class="py-4">
+              <v-btn color="primary" @click="flagEditar ? fnEditar() : fnGuardar()">
+                <v-icon left>mdi-content-save</v-icon>
+                {{ flagEditar ? 'Editar' : 'Guardar' }}
+              </v-btn>
+            </v-row>
+
+     
+          </v-container>
+        </v-card-text>
+      </v-card>
+      
+      
+
+      <!-- Dialogo Ver Más -->
+      <v-dialog v-model="dialog" max-width="500">
+        <v-card>
+          <v-card-title>Datos completos del equipo</v-card-title>
+          <v-card-text>
+            <ul>
+              <li><strong>ID:</strong> {{ usuarioSeleccionado.id }}</li>
+              <li><strong>Nombre:</strong> {{ usuarioSeleccionado.nombre }}</li>
+              <li><strong>Marca:</strong> {{ usuarioSeleccionado.campus }}</li>
+              <li><strong>Modelo:</strong> {{ usuarioSeleccionado.departamento }}</li>
+              <li><strong>Último usuario:</strong> {{ usuarioSeleccionado.puesto }}</li>
+              <li><strong>Fecha de baja:</strong> {{ usuarioSeleccionado.fechaBaja }}</li>
+              <li><strong>Motivo:</strong> {{ usuarioSeleccionado.descripcion }}</li>
+            </ul>
+          </v-card-text>
+          <v-card-actions class="justify-end">
+            <v-btn text @click="dialog = false">Cerrar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      
+             <!-- Tabla de datos -->
+            <v-row justify="center">
+                  <v-col md="12">
+                    <v-data-table :headers="headers" :items="datosTabla">
+                      <template v-slot:item.ver_mas="{ item }">
+                        <v-btn small color="info" @click="verMas(item)">Ver más</v-btn>
+                      </template>
+                      <template v-slot:item.editar="{ item }">
+                        <v-btn fab small color="warning" @click="fnCargarDatosEditar(item)">
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                      </template>
+                      <template v-slot:item.eliminar="{ item }">
+                        <v-btn fab small color="error" @click="fnAlerta(item)">
+                          <v-icon>mdi-trash-can</v-icon>
+                        </v-btn>
+                      </template>
+                      <template v-slot:item.estatus="{ item }">
+                        <v-switch v-model="item.estatus" @change="fnCambiarEstatus(item)"></v-switch>
+                      </template>
+                    </v-data-table>
+                  </v-col>
+                </v-row>
+
+      <!-- Dialogo Buscar Usuario -->
+      <v-dialog v-model="dialogBuscar" max-width="400">
+        <v-card>
+          <v-card-title>Buscar usuario por número</v-card-title>
+          <v-card-text>
+            <v-text-field
+              outlined
+              v-model="numeroBuscar"
+              label="Número de empleado"
+            ></v-text-field>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" @click="fnBuscarEmpleado()">Buscar</v-btn>
+            <v-spacer></v-spacer>
+            <v-btn text @click="dialogBuscar = false">Cerrar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-container>
+  </v-app>
+</div>
+
+<script>
+new Vue({
+  el: "#modulo-bajas",
+  vuetify: new Vuetify(),
+  data() {
+    return {
+      nombre: "",
+      campus: "",
+      departamento: "",
+      puesto: "",
+      descripcion: "",
+      fechaBaja: "",
+      menuFecha: false,
+      dialog: false,
+      dialogBuscar: false,
+      flagEditar: false,
+      idEditar: null,
+      numeroBuscar: "",
+      usuarioSeleccionado: {},
+      datosTabla: [
+        { id: 1, nombre: "Equipo A", campus: "Dell", departamento: "Latitude", puesto: "Juan Pérez", fechaBaja: "2025-05-07", descripcion: "", estatus: true },
+        { id: 2, nombre: "Equipo B", campus: "HP", departamento: "EliteBook", puesto: "Ana García", fechaBaja: "2025-05-07", descripcion: "", estatus: false }
+      ],
+      headers: [
+        { text: "ID", value: "id" },
+        { text: "Nombre", value: "nombre" },
+        { text: "Marca", value: "campus" },
+        { text: "Modelo", value: "departamento" },
+        { text: "Último usuario", value: "puesto" },
+        { text: "Fecha baja", value: "fechaBaja" },
+        { text: "Ver más", value: "ver_mas" },
+        { text: "Editar", value: "editar" },
+        { text: "Eliminar", value: "eliminar" }
+      ],
+      empleados: [
+        { numero: "1001", nombre: "Juan Pérez", puesto: "Jefe de RH", campus: "Campus central", departamento: "Recursos Humanos" },
+        { numero: "1002", nombre: "Ana García", puesto: "Coordinadora", campus: "Campus 2", departamento: "Psicopedagogía" }
+      ],
+    };
+  },
+  methods: {
+    fnGuardar() {
+      this.datosTabla.push({
+        id: this.datosTabla.length + 1,
+        nombre: this.nombre,
+        campus: this.campus,
+        departamento: this.departamento,
+        puesto: this.puesto,
+        fechaBaja: this.fechaBaja,
+        descripcion: this.descripcion,
+        estatus: true
+      });
+      this.fnLimpiar();
+      Swal.fire("¡Guardado!", "Equipo dado de baja.", "success");
+    },
+    fnCargarDatosEditar(item) {
+      this.flagEditar = true;
+      this.idEditar = item.id;
+      Object.assign(this.$data, item);
+    },
+    fnEditar() {
+      const idx = this.datosTabla.findIndex(x => x.id === this.idEditar);
+      if (idx >= 0) {
+        Object.assign(this.datosTabla[idx], {
+          nombre: this.nombre,
+          campus: this.campus,
+          departamento: this.departamento,
+          puesto: this.puesto,
+          fechaBaja: this.fechaBaja,
+          descripcion: this.descripcion,
+        });
+      }
+      this.fnLimpiar();
+      Swal.fire("¡Editado!", "Datos actualizados.", "success");
+    },
+    fnAlerta(item) {
+      Swal.fire({
+        title: "¿Dar de baja este registro?",
+        text: item.nombre,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, eliminar"
+      }).then(result => {
+        if (result.isConfirmed) {
+          this.fnEliminar(item);
+        }
+      });
+    },
+    fnEliminar(item) {
+      this.datosTabla = this.datosTabla.filter(x => x.id !== item.id);
+      Swal.fire("Eliminado", "Registro eliminado.", "success");
+    },
+    verMas(item) {
+      this.usuarioSeleccionado = { ...item };
+      this.dialog = true;
+    },
+    fnBuscarEmpleado() {
+      const e = this.empleados.find(x => x.numero === this.numeroBuscar);
+      if (e) {
+        this.puesto = e.nombre;
+        this.dialogBuscar = false;
+        Swal.fire("Empleado encontrado", "", "success");
+      } else {
+        Swal.fire("No encontrado", "Número incorrecto", "error");
+      }
+    },
+    fnLimpiar() {
+      this.nombre = this.campus = this.departamento = this.puesto = this.descripcion = this.fechaBaja = this.numeroBuscar = "";
+      this.flagEditar = false;
+      this.idEditar = null;
+    }
+  }
+});
+</script>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Control de Inventarios</title>
+
+        <!-- CSS locales -->
+        <link href="styles/icon_material_design_4495/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"/>
+    <a href="styles/icon_material_design_4495/css/materialdesignicons.min.css.map"></a>
+    <link href="styles/icon_material_design_4495/css/materialdesignicons.min_20220329.css" rel="stylesheet" type="text/css"/>
+    <link href="styles/icon_material_design_4495/css/materialdesignicons.css" rel="stylesheet" type="text/css"/>
+    <link href="javascript/VueJs/vuetify/vuetify.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: "Roboto", sans-serif;
+        }
+        .logo {
+            height: 48px;
+            margin-right: 12px;
+        }
+        .main-content {
+            padding: 24px;
+            background: white;
+            min-height: calc(100vh - 64px);
+        }
+        .content-inner {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .v-navigation-drawer {
+            background-color: #f9f9f9;
+            padding-top:0;
+            height:calc(100vh - 64px);
+            margin-top:60px;
+            border-right:1px solid #00b293;
+        }
+        .menu-btn {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            height:100px;
+            width:100%;
+            font-size:16px;
+            font-weight:600;
+            color:#cfcfcf;
+            transition:background-color .3s, color .3s;
+            user-select:none;
+        }
+        .menu-btn:hover {
+            background-color:#f9f9f9;
+            color:white;
+        }
+        .menu-btn.v-btn--active {
+            background-color:#00b293!important;
+            color:white!important;
+        }
+        .menu-icon {
+            font-size:100px;
+            margin-bottom:6px;
+            margin-top:16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <v-app>
+            <!-- App Bar -->
+            <v-app-bar dark height="64" color="#00b293">
+                <v-toolbar-title class="d-flex align-center">
+                    <v-img src="resources/logo_utlA.png" class="logo" contain max-width="50"></v-img>
+                    Control de Inventarios
+                </v-toolbar-title>
+                <v-spacer></v-spacer>
+
+                <v-icon>mdi-bell</v-icon>
+
+                <v-menu offset-y left bottom :close-on-content-click="false">
+                    <template v-slot:activator="{ on, attrs }">
+
+                        <v-btn text v-bind="attrs" v-on="on" class="d-flex">
+
+
+                            <v-icon class="white--text mr-2">mdi-account</v-icon>
+                            <span class="white--text font-weight-medium">{{ nombreEmpleado }}</span>
+                            <v-icon class="ml-2 white--text">mdi-menu-down</v-icon>
+                        </v-btn>
+                        
+                        
+
+                    </template>
+                    <v-list dense>
+                        <v-list-item @click="cerrarSesion">
+                            <v-list-item-icon><v-icon color="red">mdi-logout</v-icon></v-list-item-icon>
+                            <v-list-item-title>Cerrar Sesión</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
+            </v-app-bar>
+
+            <!-- Sidebar (usando v-for para el menú) -->
+            <v-navigation-drawer app permanent width="120" clipped>
+                <v-list nav dense>
+                    <v-list-item
+                        v-for="item in menu"
+                        :key="item.modulo"
+                        class="menu-btn"
+                        :class="{ 'v-btn--active': modulo === item.modulo }"
+                        @click="modulo = item.modulo"
+                        >
+                        <v-icon class="menu-icon">{{ item.icono }}</v-icon>
+                        <span>{{ item.nombre }}</span>
+                    </v-list-item>
+                </v-list>
+            </v-navigation-drawer>
+
+            <!-- Main Content -->
+            <v-main>
+                <v-container class="main-content" fluid>
+                    <div class="content-inner">
+                        <div v-if="modulo==='inicio'">
+                            <v-icon large color="green">mdi-home</v-icon>
+                            <h2 class="mt-3">Bienvenido</h2>
+                            <p>Selecciona una opción del menú para comenzar.</p>
+                        </div>
+                        <div v-else v-html="contenidoModulo" class="content-inner"></div>
+                    </div>
+                </v-container>
+            </v-main>
+        </v-app>
+    </div>
+
+    <!-- Scripts locales -->
+    <script src="javascript/VueJs/vue/vue.js"></script>
+    <script src="javascript/VueJs/vue/vue-composition-api.prod.js"></script>
+    <script src="javascript/VueJs/vuetify267/vuetify.js"></script>
+    <link href="styles/icon_material_design_4495/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+
+    <script>
+Vue.use(VueCompositionAPI);
+
+new Vue({
+    el: '#app',
+    vuetify: new Vuetify({icons: {iconfont: 'mdi'}}),
+    data: () => ({
+            modulo: 'inicio',
+            contenidoModulo: '',
+            nombreEmpleado: '',
+            menu: [
+                {nombre: 'Inicio', icono: 'mdi-home', modulo: 'inicio'},
+                {nombre: 'Usuarios', icono: 'mdi-account', modulo: 'usuarios'},
+                {nombre: 'Inventarios', icono: 'mdi-warehouse', modulo: 'inventarios'},
+                {nombre: 'Reasignación', icono: 'mdi-swap-horizontal', modulo: 'reasignacion'},
+                {nombre: 'Bajas', icono: 'mdi-delete', modulo: 'bajas'}
+            ]
+        }),
+    watch: {
+        modulo(nuevoModulo) {
+            this.cargarModulo(nuevoModulo);
+        }
+    },
+    mounted() {
+        this.nombreEmpleado = localStorage.getItem('nombreEmpleado') || 'Usuario';
+        this.cargarModulo(this.modulo);
+    },
+    methods: {
+        async cargarModulo(nombre) {
+            if (nombre === 'inicio') {
+                this.contenidoModulo = '';
+                return;
+            }
+            try {
+                const res = await fetch(`modulos/${nombre}.html`);
+                if (!res.ok)
+                    throw new Error('Error cargando HTML');
+                this.contenidoModulo = await res.text();
+
+                this.$nextTick(() => {
+                    // Ejecutar scripts inline
+                    document.querySelectorAll('.content-inner script').forEach(s => {
+                        const nuevoScript = document.createElement('script');
+                        nuevoScript.text = s.innerText;
+                        document.body.appendChild(nuevoScript);
+                        s.remove();
+                    });
+
+                    // Cargar JS del módulo (evitar múltiples cargas del mismo)
+                    document.querySelectorAll('script[data-modulo]').forEach(s => s.remove());
+
+                    const moduloScript = document.createElement('script');
+                    moduloScript.src = `modulos/${nombre}.js`;
+                    moduloScript.setAttribute('data-modulo', nombre);
+                    document.body.appendChild(moduloScript);
+                });
+
+            } catch (e) {
+                this.contenidoModulo = `<p style="color:red">Error: ${e.message}</p>`;
+            }
+        },
+        async cerrarSesion() {
+            const token = localStorage.getItem('token');
+            if (!token)
+                return location.href = 'index.html';
+
+            try {
+                await fetch('http://localhost:8080/inventario_web/api/login/loggout', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams({token})
+                });
+            } catch (e) {
+                // Silenciar error si backend no responde
+            }
+            localStorage.clear();
+            location.href = 'index.html';
+        }
+    }
+});
+    </script>
+</body>
+</html>
