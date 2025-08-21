@@ -11,25 +11,27 @@ import java.util.Date;
  * @author miche
  */
 public class Baja {
+
     private int id;
     private Equipo equipo;
     private Empleado empleado;
     private Date fechaBaja;
     private String motivo;
-    private String Observaciones;
+    private String observaciones;
 
     public Baja() {
     }
 
-    public Baja(int id, Equipo equipo, Empleado empleado, Date fechaBaja, String motivo, String Observaciones) {
+    public Baja(int id, Equipo equipo, Empleado empleado, Date fechaBaja, String motivo, String observaciones) {
         this.id = id;
         this.equipo = equipo;
         this.empleado = empleado;
         this.fechaBaja = fechaBaja;
         this.motivo = motivo;
-        this.Observaciones = Observaciones;
+        this.observaciones = observaciones;
     }
 
+    // Getters y setters
     public int getId() {
         return id;
     }
@@ -71,12 +73,10 @@ public class Baja {
     }
 
     public String getObservaciones() {
-        return Observaciones;
+        return observaciones;
     }
 
-    public void setObservaciones(String Observaciones) {
-        this.Observaciones = Observaciones;
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
     }
-    
-    
 }

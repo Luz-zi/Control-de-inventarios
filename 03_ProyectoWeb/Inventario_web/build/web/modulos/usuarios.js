@@ -33,6 +33,9 @@ new Vue({
 
         const datosTabla = ref([]);
 
+        const formUsuario = ref(null);
+        const valid = ref(false);
+
         const rules = {
             required: v => !!v || "Este campo es obligatorio",
         };
@@ -41,7 +44,7 @@ new Vue({
             {text: "Nº Empleado", value: "numeroEmpleado"},
             {text: "Nombre", value: "nombre", align: "center"},
             {text: "Campus", value: "campus"},
-            
+
             {text: "Correo", value: "correo"},
             {text: "Rol", value: "rol"},
             {text: "Ver más", value: "ver_mas"},
@@ -57,11 +60,25 @@ new Vue({
 
         // ✅ Funciones
 
+        function validarCampos() {
+            const campos = [numeroEmpleado.value, nombre.value, apellido1.value, /* ... */];
+            const camposValidos = campos.every(campo => rules.required(campo) === true);
+            if (!camposValidos) {
+                Swal.fire("Campos incompletos", "Por favor completa todos los campos obligatorios.", "warning");
+                return false;
+            }
+            return true;
+        }
+
+
         async function fnGuardarEnServidor() {
             if (rolUsuarioActual.value !== "ADMINISTRADOR") {
                 Swal.fire("Acceso denegado", "Solo los administradores pueden guardar usuarios.", "error");
                 return;
             }
+
+           if (!validarCampos()) return;
+
 
             const token = localStorage.getItem("token");
             if (!token) {
@@ -165,11 +182,11 @@ new Vue({
 
             flagEditar.value = true;
             mostrarFormulario.value = true;
-            
+
             Swal.fire({
                 icon: 'info',
                 title: 'Editando usuario',
-                text: `Estás editando al usuario: ${copiaItem.nombre || 'Sin nombre'}`,
+                text: `Estás editando al usuario: ${item.nombre || 'Sin nombre'}`,
                 showConfirmButton: false,
                 timer: 2000,
                 position: 'center'
@@ -274,7 +291,7 @@ new Vue({
             campus, edificio, correo, contrasenia, rol,
             mostrarFormulario, dialog, flagEditar, search,
             showPassword, datosTabla, usuarioSeleccionado,
-            headersTabla, rules, rolUsuarioActual,
+            headersTabla, rules, rolUsuarioActual, formUsuario, valid, rules,
 
             // Métodos
             fnGuardarEnServidor, fnCargarDatosEditar, fnEliminar, fnAlerta,

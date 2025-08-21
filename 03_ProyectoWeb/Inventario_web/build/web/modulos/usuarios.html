@@ -15,43 +15,45 @@
                                 Formulario de usuario
                             </v-card-title>
                             <br>
+                            
                             <v-container fluid>
                                 <v-row justify="center">
                                     <v-col cols="12" md="4">
-                                        <v-text-field outlined v-model="numeroEmpleado" label="Número Empleado" type="number"></v-text-field>
+                                        <v-text-field outlined v-model="numeroEmpleado" label="Número Empleado" type="number"
+                                                      :rules="[rules.required]"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" md="4">
-                                        <v-text-field outlined v-model="nombre" label="Nombre" @input="nombre = nombre.toUpperCase()" @blur="onBlurNombre"></v-text-field>
+                                        <v-text-field outlined v-model="nombre" label="Nombre" @input="nombre = nombre.toUpperCase()" @blur="onBlurNombre" :rules="[rules.required]"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" md="4">
-                                        <v-text-field outlined v-model="apellido1" label="Apellido Paterno" @input="apellido1 = apellido1.toUpperCase()" @blur="apellido1 = sanitizar(apellido1)"></v-text-field>
-                                    </v-col>
-                                </v-row>
-
-                                <v-row justify="center">
-                                    <v-col cols="12" md="4">
-                                        <v-text-field outlined v-model="apellido2" label="Apellido Materno" @input="apellido2 = apellido2.toUpperCase()"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" md="4">
-                                        <v-select outlined v-model="campus" :items="['CAMPUS CENTRAL', 'CAMPUS 2', 'CAMPUS ACAMBARO']" label="Campus" @change="campus = campus.toUpperCase()"></v-select>
-                                    </v-col>
-                                    <v-col cols="12" md="4">
-                                        <v-text-field outlined v-model="edificio" label="Edificio" @input="edificio = edificio.toUpperCase()"></v-text-field>
+                                        <v-text-field outlined v-model="apellido1" label="Apellido Paterno" @input="apellido1 = apellido1.toUpperCase()" @blur="apellido1 = sanitizar(apellido1)" :rules="[rules.required]"></v-text-field>
                                     </v-col>
                                 </v-row>
 
                                 <v-row justify="center">
                                     <v-col cols="12" md="4">
-                                        <v-text-field outlined v-model="correo" label="Correo" type="email" @input="correo = correo.toUpperCase()"></v-text-field>
+                                        <v-text-field outlined v-model="apellido2" label="Apellido Materno" @input="apellido2 = apellido2.toUpperCase()" :rules="[rules.required]"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" md="4">
+                                        <v-select outlined v-model="campus" :items="['CAMPUS CENTRAL', 'CAMPUS 2', 'CAMPUS ACAMBARO']" label="Campus" @change="campus = campus.toUpperCase()" :rules="[rules.required]"></v-select>
+                                    </v-col>
+                                    <v-col cols="12" md="4">
+                                        <v-text-field outlined v-model="edificio" label="Edificio" @input="edificio = edificio.toUpperCase()" :rules="[rules.required]"></v-text-field>
+                                    </v-col>
+                                </v-row>
+
+                                <v-row justify="center">
+                                    <v-col cols="12" md="4">
+                                        <v-text-field outlined v-model="correo" label="Correo" type="email" @input="correo = correo.toUpperCase()" :rules="[rules.required]"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" md="4">
                                         <v-text-field outlined v-model="contrasenia" :type="showPassword ? 'text' : 'password'"
-                                                    
+
                                                       :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                                                      @click:append="showPassword = !showPassword"  prepend-icon="mdi-lock" label="Contraseña"></v-text-field>
+                                                      @click:append="showPassword = !showPassword"  prepend-icon="mdi-lock" label="Contraseña" :rules="[rules.required]"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" md="4">
-                                        <v-select outlined v-model="rol" :items="['ADMINISTRADOR', 'USUARIO NORMAL']" label="Rol" @change="rol = rol.toUpperCase()"></v-select>
+                                        <v-select outlined v-model="rol" :items="['ADMINISTRADOR', 'USUARIO NORMAL']" label="Rol" @change="rol = rol.toUpperCase()" :rules="[rules.required]"></v-select>
                                     </v-col>
                                 </v-row>
 
@@ -65,79 +67,84 @@
                             </v-container>
                         </v-card>
                     </v-col>
-                </v-row>
+                </v-row>        
+
+
             </div>
         </v-expand-transition>
 
-        <v-container fluid>
-            <div v-show="!mostrarFormulario">
-                <v-row>
-                    <v-col>
-                        <v-card>
-                            <v-card-title style="background-color: #00b293; color:#ffffff;">
-                                Módulo de usuario
-                            </v-card-title>
+       
+                
+                    <div v-show="!mostrarFormulario">
+                        <v-row>
+                            <v-col>
+                                 <v-card>
+            <v-card-title style="background-color: #00b293; color:#ffffff;">
+                Módulo de usuario
+            </v-card-title>
+           
+            <v-container fluid>
+                                    <v-text-field v-model="search" label="Buscar" append-icon="mdi-magnify" single-line hide-details></v-text-field>
 
 
-                            <v-container fluid>
-                                <v-text-field v-model="search" label="Buscar" append-icon="mdi-magnify" single-line hide-details></v-text-field>
 
-                                <v-row justify="left">
-                                    <v-col cols="12" xs="8" md="4">
-                                        <v-btn v-if="rolUsuarioActual === 'ADMINISTRADOR'" color="#00b293" class="white--text" @click="mostrarFormulario = !mostrarFormulario">
-                                            <v-icon left>mdi-account-plus</v-icon>
-                                            Agregar Usuario
-                                        </v-btn>
-                                    </v-col>
-                                </v-row>
-                            </v-container>
-                            <v-row justify="center">
-                                <v-col md="12">
 
-                                    <v-data-table :headers="headersTabla" :items="datosTabla" :search="search">
-                                        <template v-slot:item.ver_mas="{ item }">
-                                            <v-btn small color="info" @click="verMas(item)">Ver más</v-btn>
-                                        </template>
-
-                                        <template v-slot:item.editar="{ item }">
-                                            <v-btn v-if="rolUsuarioActual === 'ADMINISTRADOR'" fab small color="warning" @click="fnCargarDatosEditar(item)" >
-                                                <v-icon>mdi-pencil</v-icon>
+                                    <v-row justify="left">
+                                        <v-col cols="12" xs="8" md="4">
+                                            <v-btn v-if="rolUsuarioActual === 'ADMINISTRADOR'" color="#00b293" class="white--text" @click="mostrarFormulario = !mostrarFormulario">
+                                                <v-icon left>mdi-account-plus</v-icon>
+                                                Agregar Usuario
                                             </v-btn>
-                                        </template>
+                                        </v-col>
+                                    </v-row>
+                                    </v-container>
+                                    <v-row justify="center">
+                                        <v-col md="12">
 
-                                        <template v-slot:item.eliminar="{ item }">
-                                            <v-btn v-if="rolUsuarioActual === 'ADMINISTRADOR'" fab small color="error" @click="fnAlerta(item)">
-                                                <v-icon>mdi-trash-can</v-icon>
-                                            </v-btn>
-                                        </template>
-                                    </v-data-table>
-                                </v-col>
-                            </v-row>
-                        </v-card>
-                    </v-col>
-                </v-row>
+                                            <v-data-table :headers="headersTabla" :items="datosTabla" :search="search">
+                                                <template v-slot:item.ver_mas="{ item }">
+                                                    <v-btn small color="info" @click="verMas(item)">Ver más</v-btn>
+                                                </template>
 
-                <v-dialog v-model="dialog" max-width="600">
-                    <v-card>
-                        <v-card-title>
-                            Datos completos del usuario
-                        </v-card-title>
-                        <v-card-text>
-                            <ul>
-                                <li><strong>Número Empleado:</strong> {{ usuarioSeleccionado.numeroEmpleado }}</li>
-                                <li><strong>Nombre completo:</strong> {{ usuarioSeleccionado.nombre }} {{ usuarioSeleccionado.apellido1 }} {{ usuarioSeleccionado.apellido2 }}</li>
-                                <li><strong>Campus:</strong> {{ usuarioSeleccionado.campus }}</li>
-                                <li><strong>Edificio:</strong> {{ usuarioSeleccionado.edificio }}</li>
-                                <li><strong>Correo:</strong> {{ usuarioSeleccionado.correo }}</li>
-                                <li><strong>Rol:</strong> {{ usuarioSeleccionado.rol }}</li>
-                            </ul>
-                        </v-card-text>
-                        <v-card-actions class="justify-end">
-                            <v-btn text @click="dialog = false">Cerrar</v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
+                                                <template v-slot:item.editar="{ item }">
+                                                    <v-btn v-if="rolUsuarioActual === 'ADMINISTRADOR'" fab small color="warning" @click="fnCargarDatosEditar(item)" >
+                                                        <v-icon>mdi-pencil</v-icon>
+                                                    </v-btn>
+                                                </template>
+
+                                                <template v-slot:item.eliminar="{ item }">
+                                                    <v-btn v-if="rolUsuarioActual === 'ADMINISTRADOR'" fab small color="error" @click="fnAlerta(item)">
+                                                        <v-icon>mdi-trash-can</v-icon>
+                                                    </v-btn>
+                                                </template>
+                                            </v-data-table>
+                                        </v-col>
+                                    </v-row>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+
+                        <v-dialog v-model="dialog" max-width="600">
+                            <v-card>
+                                <v-card-title>
+                                    Datos completos del usuario
+                                </v-card-title>
+                                <v-card-text>
+                                    <ul>
+                                        <li><strong>Número Empleado:</strong> {{ usuarioSeleccionado.numeroEmpleado }}</li>
+                                        <li><strong>Nombre completo:</strong> {{ usuarioSeleccionado.nombre }} {{ usuarioSeleccionado.apellido1 }} {{ usuarioSeleccionado.apellido2 }}</li>
+                                        <li><strong>Campus:</strong> {{ usuarioSeleccionado.campus }}</li>
+                                        <li><strong>Edificio:</strong> {{ usuarioSeleccionado.edificio }}</li>
+                                        <li><strong>Correo:</strong> {{ usuarioSeleccionado.correo }}</li>
+                                        <li><strong>Rol:</strong> {{ usuarioSeleccionado.rol }}</li>
+                                    </ul>
+                                </v-card-text>
+                                <v-card-actions class="justify-end">
+                                    <v-btn text @click="dialog = false">Cerrar</v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
+                    </div>
+                </v-container>
+            </v-container>
             </div>
-        </v-container>
-    </v-container>
-</div>

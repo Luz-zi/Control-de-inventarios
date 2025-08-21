@@ -291,11 +291,169 @@ BEGIN
 END$$
 DELIMITER ;
 
+-- --------------------------------------
+-- Buscar equipo
+-- --------------------------------------
+
+DROP PROCEDURE IF EXISTS  sp_buscar_equipo_por_numero;
+DELIMITER $$
+CREATE PROCEDURE sp_buscar_equipo_por_numero(
+  IN numeroEquipo VARCHAR(65)
+)
+BEGIN
+  SELECT
+    e.cve_equipo,
+    e.nombre,
+    e.marca,
+    e.modelo,
+    e.numero_serie,
+    e.numero_utl,
+    b.cve_baja,
+    b.fecha_baja,
+    b.motivo,
+    CONCAT(p.nombre, ' ', p.apellido1, ' ', p.apellido2) AS nombre_empleado
+  FROM Equipo e
+  LEFT JOIN Baja b ON e.cve_equipo = b.cve_equipo
+  LEFT JOIN Empleado emp ON b.cve_empleado = emp.cve_empleado
+  LEFT JOIN Persona p ON emp.cve_persona = p.cve_persona
+  WHERE e.numero_utl = numeroEquipo
+     OR e.numero_serie = numeroEquipo;
+END $$
+
+DELIMITER ;
 
 
+SELECT * FROM EQUIPO; 
 
-    
+DROP PROCEDURE IF EXISTS sp_buscar_equipo_por_numero;
+DELIMITER $$
+CREATE PROCEDURE sp_buscar_equipo_por_numero(
+  IN numeroEquipo VARCHAR(65)
+)
+BEGIN
+  SELECT
+    e.cve_equipo,
+    e.nombre,
+    e.marca,
+    e.modelo,
+    e.numero_serie,
+    e.numero_utl,
+    CONCAT(p.nombre, ' ', p.apellido1, ' ', p.apellido2) AS nombre_empleado
+  FROM Equipo e
+  LEFT JOIN AsignacionEquipo ae ON e.cve_equipo = ae.cve_equipo AND ae.activo = 1
+  LEFT JOIN Empleado emp ON ae.cve_empleado = emp.cve_empleado
+  LEFT JOIN Persona p ON emp.cve_persona = p.cve_persona
+  WHERE e.numero_utl = numeroEquipo
+     OR e.numero_serie = numeroEquipo;
+END $$
+DELIMITER ;
+
+CALL sp_buscar_equipo_por_numero(123456);
+
+-- --------------------------------------
+-- Dar de baja equipo
+-- --------------------------------------
+DROP PROCEDURE IF EXISTS sp_insertar_baja;
+DELIMITER $$
+
+CREATE PROCEDURE sp_insertar_baja(
+    IN p_cve_equipo INT,
+    IN p_cve_empleado INT,
+    IN p_motivo VARCHAR(255),
+    IN p_observaciones TEXT,
+    OUT p_cve_baja INT
+)
+BEGIN
+  
+    UPDATE Baja
+    SET activo = 0
+    WHERE cve_equipo = p_cve_equipo AND activo = 1;
+
+   
+    INSERT INTO Baja (
+        cve_equipo,
+        cve_empleado,
+        fecha_baja,
+        motivo,
+        observaciones,
+        activo
+    ) VALUES (
+        p_cve_equipo,
+        p_cve_empleado,
+        NOW(),
+        p_motivo,
+        p_observaciones,
+        1
+    );
+
+  
+    SET p_cve_baja = LAST_INSERT_ID();
+
+  
+    UPDATE Equipo
+    SET activo = 0
+    WHERE cve_equipo = p_cve_equipo;
+
+    IF ROW_COUNT() = 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'No se pudo actualizar el estado del equipo.';
+    END IF;
+
+    -- 5. Cerrar asignación activa (si existe)
+    UPDATE AsignacionEquipo
+    SET activo = 0,
+        fecha_fin = NOW()
+    WHERE cve_equipo = p_cve_equipo AND activo = 1;
+END$$
+DELIMITER ;
 
 
+-- --------------------------------------
+-- Asignación de equipo
+-- --------------------------------------
+DROP PROCEDURE IF EXISTS sp_insertar_asignacion_equipo;
+DELIMITER $$
 
+CREATE PROCEDURE sp_insertar_asignacion_equipo (
+    IN p_cve_equipo INT,
+    IN p_cve_empleado INT,
+    IN p_fecha_asignacion DATETIME,
+    IN p_fecha_fin DATETIME,
+    IN p_activo INT
+)
+BEGIN
+    -- 1. Cerrar asignación activa anterior (si existe)
+    UPDATE AsignacionEquipo
+    SET activo = 0,
+        fecha_fin = NOW()
+    WHERE cve_equipo = p_cve_equipo AND activo = 1;
 
+    -- 2. Insertar nueva asignación
+    INSERT INTO AsignacionEquipo (
+        cve_equipo,
+        cve_empleado,
+        fecha_asignacion,
+        fecha_fin,
+        activo
+    ) VALUES (
+        p_cve_equipo,
+        p_cve_empleado,
+        COALESCE(p_fecha_asignacion, NOW()),
+        p_fecha_fin,
+        p_activo
+    );
+
+    -- 3. Reactivar el equipo
+    UPDATE Equipo
+    SET activo = 1
+    WHERE cve_equipo = p_cve_equipo;
+
+    -- 4. Desactivar registros de baja (si existen)
+    UPDATE Baja
+    SET activo = 0
+    WHERE cve_equipo = p_cve_equipo AND activo = 1;
+
+    -- 5. Devolver el ID de la asignación
+    SELECT LAST_INSERT_ID() AS idAsignacion;
+END$$
+DELIMITER ;

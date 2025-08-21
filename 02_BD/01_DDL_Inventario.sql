@@ -103,12 +103,13 @@ CREATE TABLE Baja (
     fecha_baja DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     motivo VARCHAR(255) DEFAULT 'Fin de asignación',
     observaciones TEXT,
+	activo INT NOT NULL DEFAULT 1, -- 1: activa, 0: inactiva
     FOREIGN KEY (cve_equipo) REFERENCES Equipo(cve_equipo),
     FOREIGN KEY (cve_empleado) REFERENCES Empleado(cve_empleado)
 );
 	
-    
-    
+
+
 
 
 

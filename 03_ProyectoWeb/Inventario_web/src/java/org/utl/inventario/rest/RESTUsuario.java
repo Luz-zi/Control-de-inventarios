@@ -19,7 +19,6 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 import org.utl.inventario.controller.ControllerEmpleado;
 import org.utl.inventario.controller.ControllerLogin;
-
 import org.utl.inventario.model.Empleado;
 
 @Path("usuario")

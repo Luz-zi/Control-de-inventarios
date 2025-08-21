@@ -8,7 +8,7 @@ VALUES
 -- Insertar en usuario
 INSERT INTO usuario ( usuario, contrasenia, rol, activo)
 VALUES
-('usuario', '1234', 'ADMINISTRADOR', 1);
+('001', '1234', 'ADMINISTRADOR', 1);
 
 
 -- Insertar en empleado

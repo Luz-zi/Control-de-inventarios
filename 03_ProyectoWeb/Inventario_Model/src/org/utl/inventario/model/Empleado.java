@@ -39,8 +39,7 @@ public class Empleado {
         this.activo = activo;
     }
     
-    
-
+  
     public int getId() {
         return id;
     }

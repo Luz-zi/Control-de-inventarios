@@ -43,7 +43,7 @@ new Vue({
         const snackbarIcon = ref("mdi-check-circle"); // Íconos de Material Design
 
         const headers = ref([
-            {text: "ID", value: "equipoId"},
+            {text: "No.Utl", value: "noUtl"},
             {text: "Responsable", value: "nombre"},
             {text: "Marca", value: "marca"},
             {text: "Modelo", value: "modelo"},
@@ -161,6 +161,7 @@ new Vue({
                 datosTabla.value = data.map(item => ({
                         id: item.id,
                         equipoId: item.equipo?.id,
+                        empleadoId: item.empleado?.id,
                         nombre: `${item.empleado?.persona?.nombre} ${item.empleado?.persona?.apellido1} ${item.empleado?.persona?.apellido2}`,
                         noEmp: item.empleado?.numeroEmpleado,
                         telefono: item.empleado?.persona?.telefono,
@@ -315,6 +316,8 @@ new Vue({
                     position: 'center'
                 });
             }
+
+
         }
 
         function fnCargarDatosEditar(item) {
@@ -488,6 +491,7 @@ new Vue({
         }
 
         function fnEliminar(item) {
+            fnAlerta(item);
             const i = datosTabla.value.findIndex(x => x.id == item.id);
             datosTabla.value.splice(i, 1);
         }
@@ -533,6 +537,41 @@ new Vue({
                 alert("Error al obtener los datos del empleado.");
             }
         }
+
+        function fnAlerta(item) {
+            Swal.fire({
+                icon: 'question',
+                title: '¿Estás seguro?',
+                text: '¿Deseas dar de baja este equipo?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, dar de baja',
+                cancelButtonText: 'Cancelar'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    localStorage.setItem("equipoParaBaja", JSON.stringify({
+                        equipoId: item.equipoId, // ID del equipo
+                        noUtl: item.noUtl || '',
+                        nombreEquipo: item.nombreEquipo || '',
+                        usuario: item.nombre || '',
+                        marca: item.marca || '',
+                        modelo: item.modelo || ''
+                       
+                    }));
+
+ // Guardar todo el objeto del equipo
+            localStorage.setItem("equipoParaBaja", JSON.stringify(item));
+
+                    const app = document.getElementById('app').__vue__;
+                    app.modulo = 'bajas';
+
+                    setTimeout(() => {
+                        const evento = new Event("mostrarFormulario");
+                        window.dispatchEvent(evento);
+                    }, 500);
+                }
+            });
+        }
+
 
 
         return {
